@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS tokens
     uuid       UUID        NOT NULL,
     status     status_enum NOT NULL DEFAULT 'pending',
     ip_address VARCHAR(45) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
     scanned_at TIMESTAMP
 );
 
