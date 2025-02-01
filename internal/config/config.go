@@ -11,6 +11,7 @@ type Config struct {
 	Postgres Postgres
 	Metrics  Metrics
 	Platform Platform
+	Security Security
 }
 
 type Service struct {
@@ -33,6 +34,10 @@ type Metrics struct {
 
 type Platform struct {
 	Env string `env:"ENV"`
+}
+
+type Security struct {
+	SigningKey string `env:"SECURITY_SIGNING_KEY"`
 }
 
 func MustLoad() *Config {
