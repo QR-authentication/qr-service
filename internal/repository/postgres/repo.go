@@ -44,6 +44,7 @@ func (r *Repository) StoreToken(token, uuid, ip string) error {
 
 func (r *Repository) GetTokenStatus(token string) (string, error) {
 	var tokenStatus string
+	log.Println(token)
 
 	query := `SELECT status FROM tokens WHERE token = $1`
 
