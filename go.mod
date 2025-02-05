@@ -3,6 +3,7 @@ module github.com/QR-authentication/qr-service
 go 1.23.0
 
 require (
+	github.com/QR-authentication/metrics-lib v0.0.0-20250204214804-9686f04dd241
 	github.com/QR-authentication/qr-proto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.6.0
