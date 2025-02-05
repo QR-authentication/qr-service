@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"time"
 
 	qrproto "github.com/QR-authentication/qr-proto/qr-proto"
@@ -82,7 +81,6 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 	}
 
 	if time.Now().Unix() > int64(exp) {
-		log.Println(time.Now().Unix(), int64(exp))
 		err = s.repository.UpdateTokenStatusToExpired(in.Token)
 		if err != nil {
 			return &qrproto.VerifyQROut{AccessGranted: false}, err
