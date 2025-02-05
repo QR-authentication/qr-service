@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create metrics object: ", err)
 	}
+	defer metrics.Disconnect()
 
 	QRService := service.New(DBRepo, cfg.Security.SigningKey)
 	grpcServer := grpc.NewServer(
