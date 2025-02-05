@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"time"
 
 	qrproto "github.com/QR-authentication/qr-proto/qr-proto"
@@ -28,8 +27,7 @@ func New(DBRepo DBRepo, signingKey string) *Service {
 
 func (s *Service) CreateQR(ctx context.Context, in *qrproto.CreateQRIn) (*qrproto.CreateQROut, error) {
 	claims := jwt.MapClaims{
-		//"exp":     time.Now().Add(time.Second * 30).Unix(),
-		"exp":    time.Now().Add(time.Hour * 30).Unix(),
+		"exp":    time.Now().Add(time.Second * 30).Unix(),
 		"random": generateRandomString(32),
 	}
 
@@ -83,7 +81,6 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 	}
 
 	if time.Now().Unix() > int64(exp) {
-		log.Println(time.Now().Unix(), int64(exp))
 		err = s.repository.UpdateTokenStatusToExpired(in.Token)
 		if err != nil {
 			return &qrproto.VerifyQROut{AccessGranted: false}, err
@@ -96,7 +93,7 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 	}
 
 	if tokenStatus != "pending" {
-		return &qrproto.VerifyQROut{AccessGranted: false}, fmt.Errorf("token is not valid for access (status: %s)", tokenStatus)
+		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
 	if err = s.repository.UpdateTokenStatusToScanned(in.Token); err != nil {
@@ -107,11 +104,7 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 }
 
 func (s *Service) parseAndValidateToken(tokenString string) (*jwt.Token, error) {
-	fmt.Println("Parsing token:", tokenString)
-
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		fmt.Println("Token Header:", token.Header)
-
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
