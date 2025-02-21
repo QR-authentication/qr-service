@@ -25,7 +25,7 @@ func New(DBRepo DBRepo, signingKey string) *Service {
 	}
 }
 
-func (s *Service) CreateQR(ctx context.Context, in *qrproto.CreateQRIn) (*qrproto.CreateQROut, error) {
+func (s *Service) CreateQR(_ context.Context, in *qrproto.CreateQRIn) (*qrproto.CreateQROut, error) {
 	claims := jwt.MapClaims{
 		"exp":    time.Now().Add(time.Second * 30).Unix(),
 		"random": generateRandomString(32),
@@ -64,7 +64,7 @@ func generateRandomString(length int) string {
 	return string(randomBytes)
 }
 
-func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrproto.VerifyQROut, error) {
+func (s *Service) VerifyQR(_ context.Context, in *qrproto.VerifyQRIn) (*qrproto.VerifyQROut, error) {
 	token, err := s.parseAndValidateToken(in.Token)
 	if err != nil {
 		return &qrproto.VerifyQROut{AccessGranted: false}, err
