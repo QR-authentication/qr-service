@@ -42,17 +42,17 @@ func (r *Repository) StoreToken(token, uuid, ip string) error {
 	return nil
 }
 
-func (r *Repository) GetTokenStatus(token string) (string, error) {
-	var tokenStatus string
+func (r *Repository) TokenStatusIsScanned(token string) (bool, error) {
+	var isScanned bool
 
-	query := `SELECT status FROM tokens WHERE token = $1`
+	query := `SELECT status = 'scanned' FROM tokens WHERE token = $1`
 
-	err := r.connection.Get(&tokenStatus, query, token)
+	err := r.connection.Get(&isScanned, query, token)
 	if err != nil {
-		return "", fmt.Errorf("failed to get token status: %w", err)
+		return false, fmt.Errorf("failed to get token status: %w", err)
 	}
 
-	return tokenStatus, nil
+	return isScanned, nil
 }
 
 func (r *Repository) UpdateTokenStatusToExpired(token string) error {

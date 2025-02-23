@@ -37,7 +37,7 @@ type Platform struct {
 }
 
 type Security struct {
-	SigningKey string `env:"SECURITY_SIGNING_KEY"`
+	SigningKey string `env:"SECURITY_QR_SIGNING_KEY"`
 }
 
 func MustLoad() *Config {
