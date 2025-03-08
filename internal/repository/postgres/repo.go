@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/QR-authentication/qr-service/internal/config"
 	guuid "github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Импорт драйвера PostgreSQL
+
+	"github.com/QR-authentication/qr-service/internal/config"
 )
 
 type Repository struct {

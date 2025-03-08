@@ -5,10 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/QR-authentication/qr-service/internal/config"
+	"google.golang.org/grpc"
 
 	metrics "github.com/QR-authentication/metrics-lib"
-	"google.golang.org/grpc"
+
+	"github.com/QR-authentication/qr-service/internal/config"
 )
 
 func MetricsInterceptor(metrics *metrics.Metrics) func(

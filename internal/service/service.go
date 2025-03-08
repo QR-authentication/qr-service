@@ -7,13 +7,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/skip2/go-qrcode"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	qrproto "github.com/QR-authentication/qr-proto/qr-proto"
+
+	"github.com/QR-authentication/qr-service/internal/config"
 	"github.com/QR-authentication/qr-service/internal/model"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/skip2/go-qrcode"
 )
 
 type Service struct {
@@ -29,9 +31,14 @@ func New(DBRepo DBRepo, signingKey string) *Service {
 	}
 }
 
-func (s *Service) CreateQR(_ context.Context, in *qrproto.CreateQRIn) (*qrproto.CreateQROut, error) {
+func (s *Service) CreateQR(ctx context.Context, in *qrproto.CreateQRIn) (*qrproto.CreateQROut, error) {
+	uuid, ok := ctx.Value(config.KeyUUID).(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "failed to find UUID")
+	}
+
 	claims := model.QRClaims{
-		UUID:   in.Uuid,
+		UUID:   uuid,
 		Random: generateRandomString(32),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Second)),
@@ -46,7 +53,7 @@ func (s *Service) CreateQR(_ context.Context, in *qrproto.CreateQRIn) (*qrproto.
 		return nil, status.Errorf(codes.Internal, "failed to sign token: %v", err)
 	}
 
-	if err = s.repository.StoreToken(tokenString, in.Uuid, in.Ip); err != nil {
+	if err = s.repository.StoreToken(tokenString, uuid, in.Ip); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to store token in repository: %v", err)
 	}
 
@@ -56,7 +63,7 @@ func (s *Service) CreateQR(_ context.Context, in *qrproto.CreateQRIn) (*qrproto.
 	}
 
 	return &qrproto.CreateQROut{
-		QR: base64.StdEncoding.EncodeToString(qrImg),
+		Qr: base64.StdEncoding.EncodeToString(qrImg),
 	}, nil
 }
 
