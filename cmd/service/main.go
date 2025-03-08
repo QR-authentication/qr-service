@@ -31,6 +31,7 @@ func main() {
 	QRService := service.New(DBRepo, cfg.Security.SigningKey)
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
+			infra.AuthInterceptor,
 			infra.MetricsInterceptor(metrics),
 		),
 	)
