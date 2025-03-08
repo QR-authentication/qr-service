@@ -2,4 +2,7 @@ package config
 
 type key string
 
-const KeyMetrics key = key("metrics")
+const (
+	KeyUUID    key = key("uuid")
+	KeyMetrics key = key("metrics")
+)
