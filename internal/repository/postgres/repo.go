@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	guuid "github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Импорт драйвера PostgreSQL
 
@@ -33,9 +32,9 @@ func (r *Repository) Close() {
 	_ = r.connection.Close()
 }
 
-func (r *Repository) StoreToken(token, uuid, ip string) error {
-	query := `INSERT INTO tokens (id, token, uuid, ip_address) VALUES ($1, $2, $3, $4)`
-	_, err := r.connection.Exec(query, guuid.New(), token, uuid, ip)
+func (r *Repository) StoreToken(token, uuid string) error {
+	query := `INSERT INTO tokens (token, uuid) VALUES ($1, $2)`
+	_, err := r.connection.Exec(query, token, uuid)
 	if err != nil {
 		return fmt.Errorf("failed to insert token: %w", err)
 	}
