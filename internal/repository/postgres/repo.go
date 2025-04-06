@@ -56,7 +56,7 @@ func (r *Repository) TokenStatusIsScanned(token string) (bool, error) {
 }
 
 func (r *Repository) UpdateTokenStatusToExpired(token string) error {
-	query := `UPDATE tokens SET status = 'expired' WHERE token = $1`
+	query := `UPDATE tokens SET status = 'expired', scanned_at = NOW() WHERE token = $1`
 
 	_, err := r.connection.Exec(query, token)
 	if err != nil {
