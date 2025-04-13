@@ -104,7 +104,7 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
-	if err = s.repository.UpdateTokenStatusToScanned(ctx, in.Token); err != nil {
+	if err = s.repository.UpdateTokenStatusToScanned(ctx, in.Action, in.Token); err != nil {
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update token status: %v", err)
 	}
 

@@ -67,10 +67,10 @@ func (r *Repository) UpdateTokenStatusToExpired(ctx context.Context, token strin
 	return nil
 }
 
-func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, token string) error {
-	query := `UPDATE tokens SET status = 'scanned', scanned_at = NOW() WHERE token = $1`
+func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, action, token string) error {
+	query := `UPDATE tokens SET status = 'scanned', action = $1, scanned_at = NOW() WHERE token = $2`
 
-	_, err := r.connection.ExecContext(ctx, query, token)
+	_, err := r.connection.ExecContext(ctx, query, action, token)
 	if err != nil {
 		return fmt.Errorf("failed to update token status to scanned: %w", err)
 	}

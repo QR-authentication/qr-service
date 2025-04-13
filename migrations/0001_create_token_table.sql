@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS tokens
     token      TEXT        NOT NULL,
     uuid       UUID        NOT NULL,
     status     status_enum NOT NULL DEFAULT 'pending',
-    action     action_enum NOT NULL,
+    action     action_enum,
     created_at TIMESTAMP            DEFAULT NOW(),
     scanned_at TIMESTAMP
 );
