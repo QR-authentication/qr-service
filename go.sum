@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/QR-authentication/metrics-lib v0.0.0-20250204214804-9686f04dd241 h1:q+uAsxWXOGCblcnEsX2o0X1qgy7C4wUsRNvoxsjGu9g=
 github.com/QR-authentication/metrics-lib v0.0.0-20250204214804-9686f04dd241/go.mod h1:2uPvp8bLrpTjlvqS27iZR9BosH9+zB/PaByxD8GJ8YY=
-github.com/QR-authentication/qr-proto v0.0.5 h1:XTmvo3JTZSKXv3Ha62E/bEd/YRmPqshGZkDVfpVRYqo=
-github.com/QR-authentication/qr-proto v0.0.5/go.mod h1:G2cXaaip1jrC/LtN3Fk4z+MvSZtkotTnOysxU77OmaU=
+github.com/QR-authentication/qr-proto v0.0.7 h1:MFccv2iWX0u3ZVFXrxjrhN4flvjNgjg8tOf4cwIiIkM=
+github.com/QR-authentication/qr-proto v0.0.7/go.mod h1:G2cXaaip1jrC/LtN3Fk4z+MvSZtkotTnOysxU77OmaU=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=

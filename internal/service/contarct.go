@@ -1,8 +1,11 @@
 package service
 
+import "context"
+
 type DBRepo interface {
-	StoreToken(token, uuid string) error
-	TokenStatusIsScanned(token string) (bool, error)
-	UpdateTokenStatusToExpired(token string) error
-	UpdateTokenStatusToScanned(token string) error
+	StoreToken(ctx context.Context, token, uuid string) error
+	TokenStatusIsScanned(ctx context.Context, token string) (bool, error)
+	UpdateTokenStatusToExpired(ctx context.Context, token string) error
+	UpdateTokenStatusToScanned(ctx context.Context, token string) error
+	GetLatestAction(ctx context.Context, uuid string) (string, error)
 }

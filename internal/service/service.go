@@ -54,7 +54,7 @@ func (s *Service) CreateQR(ctx context.Context, _ *emptypb.Empty) (*qrproto.Crea
 		return nil, status.Errorf(codes.Internal, "failed to sign token: %v", err)
 	}
 
-	if err = s.repository.StoreToken(tokenString, uuid); err != nil {
+	if err = s.repository.StoreToken(ctx, tokenString, uuid); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to store token in repository: %v", err)
 	}
 
@@ -68,14 +68,28 @@ func (s *Service) CreateQR(ctx context.Context, _ *emptypb.Empty) (*qrproto.Crea
 	}, nil
 }
 
-func (s *Service) VerifyQR(_ context.Context, in *qrproto.VerifyQRIn) (*qrproto.VerifyQROut, error) {
+func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrproto.VerifyQROut, error) {
+	uuid, ok := ctx.Value(config.KeyUUID).(string)
+	if !ok {
+		return &qrproto.VerifyQROut{AccessGranted: false}, status.Error(codes.Unauthenticated, "failed to find UUID")
+	}
+
+	latestAction, err := s.repository.GetLatestAction(ctx, uuid)
+	if err != nil {
+		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to get user latest action: %v", err)
+	}
+
+	if latestAction == in.Action {
+		return &qrproto.VerifyQROut{AccessGranted: false}, nil
+	}
+
 	token := s.parseAndValidateToken(in.Token)
 	claims, ok := token.Claims.(*model.QRClaims)
 	if !ok {
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Error(codes.InvalidArgument, "invalid token claims")
 	}
 
-	isScanned, err := s.repository.TokenStatusIsScanned(in.Token)
+	isScanned, err := s.repository.TokenStatusIsScanned(ctx, in.Token)
 	if err != nil {
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to get token status: %v", err)
 	}
@@ -84,13 +98,13 @@ func (s *Service) VerifyQR(_ context.Context, in *qrproto.VerifyQRIn) (*qrproto.
 	}
 
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
-		if err := s.repository.UpdateTokenStatusToExpired(in.Token); err != nil {
+		if err = s.repository.UpdateTokenStatusToExpired(ctx, in.Token); err != nil {
 			return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update expired token: %v", err)
 		}
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
-	if err = s.repository.UpdateTokenStatusToScanned(in.Token); err != nil {
+	if err = s.repository.UpdateTokenStatusToScanned(ctx, in.Token); err != nil {
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update token status: %v", err)
 	}
 
