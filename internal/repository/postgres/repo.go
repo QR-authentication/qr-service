@@ -78,15 +78,15 @@ func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, action, tok
 	return nil
 }
 
-func (r *Repository) GetLatestAction(ctx context.Context, uuid string) (string, error) {
+func (r *Repository) GetLatestAction(ctx context.Context, uuid string) string {
 	var action string
 
 	query := `SELECT action FROM tokens WHERE uuid = $1 ORDER BY created_at DESC LIMIT 1`
 
 	err := r.connection.GetContext(ctx, &action, query, uuid)
 	if err != nil {
-		return "", fmt.Errorf("failed to get latest action: %w", err)
+		return ""
 	}
 
-	return action, nil
+	return action
 }

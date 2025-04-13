@@ -74,11 +74,7 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Error(codes.Unauthenticated, "failed to find UUID")
 	}
 
-	latestAction, err := s.repository.GetLatestAction(ctx, uuid)
-	if err != nil {
-		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to get user latest action: %v", err)
-	}
-
+	latestAction := s.repository.GetLatestAction(ctx, uuid)
 	if latestAction == in.Action {
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
