@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -80,10 +79,7 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Error(codes.Internal, "failed to get latest user action")
 	}
 
-	log.Printf("latest %s", latestAction)
-	log.Printf("in %s", in.Action)
 	if latestAction == in.Action {
-		log.Printf("denied")
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
@@ -108,8 +104,23 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
-	if err = s.repository.UpdateTokenStatusToScanned(ctx, in.Action, in.Token); err != nil {
+	if err = s.repository.UpdateTokenStatusToScanned(ctx, in.Token); err != nil {
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update token status: %v", err)
+	}
+
+	hasAction, err := s.repository.HasActionForUUID(ctx, uuid)
+	if err != nil {
+		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to check if actions for uuid exists: %v", err)
+	}
+
+	if hasAction {
+		if err = s.repository.UpdateAction(ctx, in.Action, uuid); err != nil {
+			return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update latest action: %v", err)
+		}
+	} else {
+		if err = s.repository.InsertAction(ctx, in.Action, uuid); err != nil {
+			return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to insert latest action: %v", err)
+		}
 	}
 
 	return &qrproto.VerifyQROut{AccessGranted: true}, nil

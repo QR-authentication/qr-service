@@ -69,10 +69,10 @@ func (r *Repository) UpdateTokenStatusToExpired(ctx context.Context, token strin
 	return nil
 }
 
-func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, action, token string) error {
-	query := `UPDATE tokens SET status = 'scanned', action = $1, scanned_at = NOW() WHERE token = $2`
+func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, token string) error {
+	query := `UPDATE tokens SET status = 'scanned', scanned_at = NOW() WHERE token = $1`
 
-	_, err := r.connection.ExecContext(ctx, query, action, token)
+	_, err := r.connection.ExecContext(ctx, query, token)
 	if err != nil {
 		return fmt.Errorf("failed to update token status to scanned: %w", err)
 	}
@@ -81,21 +81,54 @@ func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, action, tok
 }
 
 func (r *Repository) GetLatestAction(ctx context.Context, uuid string) (string, error) {
-	var action sql.NullString
+	var action string
 
-	query := `SELECT action FROM tokens WHERE uuid = $1 ORDER BY created_at DESC LIMIT 1`
+	query := `SELECT action FROM actions WHERE uuid = $1`
 
 	err := r.connection.GetContext(ctx, &action, query, uuid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", fmt.Errorf("failed to no action found for uuid: %s", uuid)
+			return "", nil
 		}
 		return "", fmt.Errorf("failed to get latest action for uuid %s: %w", uuid, err)
 	}
 
-	if !action.Valid {
-		return "", nil
+	return action, nil
+}
+
+func (r *Repository) HasActionForUUID(ctx context.Context, uuid string) (bool, error) {
+	var exists bool
+
+	query := `SELECT EXISTS (SELECT 1 FROM actions WHERE uuid = $1)`
+	err := r.connection.GetContext(ctx, &exists, query, uuid)
+	if err != nil {
+		return false, fmt.Errorf("failed to check user existence for uuid %s: %w", uuid, err)
 	}
 
-	return action.String, nil
+	return exists, nil
+}
+
+func (r *Repository) UpdateAction(ctx context.Context, action, uuid string) error {
+	query := `
+        UPDATE actions 
+        SET action = $1, created_at = NOW()
+        WHERE uuid = $2`
+	_, err := r.connection.ExecContext(ctx, query, action, uuid)
+	if err != nil {
+		return fmt.Errorf("failed to update action for uuid %s: %w", uuid, err)
+	}
+
+	return nil
+}
+
+func (r *Repository) InsertAction(ctx context.Context, action, uuid string) error {
+	query := `
+        INSERT INTO actions (action, uuid, created_at)
+        VALUES ($1, $2, NOW())`
+	_, err := r.connection.ExecContext(ctx, query, action, uuid)
+	if err != nil {
+		return fmt.Errorf("failed to insert action for uuid %s: %w", uuid, err)
+	}
+
+	return nil
 }
