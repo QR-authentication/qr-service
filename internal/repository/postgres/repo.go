@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -78,15 +80,22 @@ func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, action, tok
 	return nil
 }
 
-func (r *Repository) GetLatestAction(ctx context.Context, uuid string) string {
-	var action string
+func (r *Repository) GetLatestAction(ctx context.Context, uuid string) (string, error) {
+	var action sql.NullString
 
 	query := `SELECT action FROM tokens WHERE uuid = $1 ORDER BY created_at DESC LIMIT 1`
 
 	err := r.connection.GetContext(ctx, &action, query, uuid)
 	if err != nil {
-		return ""
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("failed to no action found for uuid: %s", uuid)
+		}
+		return "", fmt.Errorf("failed to get latest action for uuid %s: %w", uuid, err)
 	}
 
-	return action
+	if !action.Valid {
+		return "", nil
+	}
+
+	return action.String, nil
 }
