@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -75,7 +76,10 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 	}
 
 	latestAction := s.repository.GetLatestAction(ctx, uuid)
+	log.Printf("latest %s", latestAction)
+	log.Printf("in %s", in.Action)
 	if latestAction == in.Action {
+		log.Printf("denied")
 		return &qrproto.VerifyQROut{AccessGranted: false}, nil
 	}
 
