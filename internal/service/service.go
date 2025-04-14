@@ -108,19 +108,8 @@ func (s *Service) VerifyQR(ctx context.Context, in *qrproto.VerifyQRIn) (*qrprot
 		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update token status: %v", err)
 	}
 
-	hasAction, err := s.repository.HasActionForUUID(ctx, uuid)
-	if err != nil {
-		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to check if actions for uuid exists: %v", err)
-	}
-
-	if hasAction {
-		if err = s.repository.UpdateAction(ctx, in.Action, uuid); err != nil {
-			return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to update latest action: %v", err)
-		}
-	} else {
-		if err = s.repository.InsertAction(ctx, in.Action, uuid); err != nil {
-			return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to insert latest action: %v", err)
-		}
+	if err = s.repository.InsertAction(ctx, in.Action, uuid); err != nil {
+		return &qrproto.VerifyQROut{AccessGranted: false}, status.Errorf(codes.Internal, "failed to insert action: %v", err)
 	}
 
 	return &qrproto.VerifyQROut{AccessGranted: true}, nil

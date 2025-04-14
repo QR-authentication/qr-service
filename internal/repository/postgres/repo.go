@@ -83,7 +83,7 @@ func (r *Repository) UpdateTokenStatusToScanned(ctx context.Context, token strin
 func (r *Repository) GetLatestAction(ctx context.Context, uuid string) (string, error) {
 	var action string
 
-	query := `SELECT action FROM actions WHERE uuid = $1`
+	query := `SELECT action FROM actions WHERE uuid = $1 ORDER BY created_at DESC LIMIT 1`
 
 	err := r.connection.GetContext(ctx, &action, query, uuid)
 	if err != nil {
@@ -94,31 +94,6 @@ func (r *Repository) GetLatestAction(ctx context.Context, uuid string) (string, 
 	}
 
 	return action, nil
-}
-
-func (r *Repository) HasActionForUUID(ctx context.Context, uuid string) (bool, error) {
-	var exists bool
-
-	query := `SELECT EXISTS (SELECT 1 FROM actions WHERE uuid = $1)`
-	err := r.connection.GetContext(ctx, &exists, query, uuid)
-	if err != nil {
-		return false, fmt.Errorf("failed to check user existence for uuid %s: %w", uuid, err)
-	}
-
-	return exists, nil
-}
-
-func (r *Repository) UpdateAction(ctx context.Context, action, uuid string) error {
-	query := `
-        UPDATE actions 
-        SET action = $1, created_at = NOW()
-        WHERE uuid = $2`
-	_, err := r.connection.ExecContext(ctx, query, action, uuid)
-	if err != nil {
-		return fmt.Errorf("failed to update action for uuid %s: %w", uuid, err)
-	}
-
-	return nil
 }
 
 func (r *Repository) InsertAction(ctx context.Context, action, uuid string) error {
